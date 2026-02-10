@@ -1,0 +1,5 @@
+{
+  "name": "TabVault - 열린 탭을 지식 자산으로",
+  "description": "과도하게 열린 브라우저 탭을 AI로 자동 분류하고 Notion에 체계적으로 저장하여 지식 자산화하는 툴입니다.",
+  "requestFramePermissions": []
+}

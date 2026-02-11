@@ -18,7 +18,7 @@ export interface AnalysisResult {
 
 export interface ApiConfig {
   notionApiKey: string;
-  notionDatabaseId: string;
+  notionParentPageId: string;
   geminiApiKey: string;
   openaiApiKey: string;
   anthropicApiKey: string;

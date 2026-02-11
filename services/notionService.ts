@@ -1,8 +1,8 @@
 import { Tab, CategoryGroup, ApiConfig } from "../types";
 
 export const saveTabsToNotion = async (groups: CategoryGroup[], tabs: Tab[], config: ApiConfig): Promise<void> => {
-  if (!config.notionApiKey || !config.notionDatabaseId) {
-    throw new Error("Notion API 설정이 올바르지 않습니다.");
+  if (!config.notionApiKey || !config.notionParentPageId) {
+    throw new Error("Notion API 설정이 올바르지 않습니다. 설정 페이지에서 확인해주세요.");
   }
 
   // notion-sdk-js를 직접 사용하거나 HTTP Fetch를 사용할 수 있습니다.
@@ -20,7 +20,7 @@ export const saveTabsToNotion = async (groups: CategoryGroup[], tabs: Tab[], con
           'Notion-Version': '2022-06-28'
         },
         body: JSON.stringify({
-          parent: { database_id: config.notionDatabaseId },
+          parent: { database_id: config.notionParentPageId },
           properties: {
             Title: {
               title: [

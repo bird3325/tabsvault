@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "TabVault",
+    "name": "TabsVault - 열린 탭을 지식 자산으로",
     "version": "1.0.0",
     "description": "열린 탭을 지식 자산으로 관리하세요.",
     "permissions": [
@@ -12,5 +12,9 @@
     ],
     "action": {
         "default_popup": "popup.html"
+    },
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": true
     }
 }

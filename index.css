@@ -1,20 +1,20 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
 
-/* 팝업 전용 베이스 스타일 */
 @layer base {
     .popup-body {
-        width: 450px;
-        height: 600px;
+        width: 400px;
+        height: 550px;
         margin: 0;
         padding: 0;
-        font-family: 'Outfit', 'Noto Sans KR', sans-serif;
-        background: #F8FAFF;
+        font-family: 'Inter', 'Noto Sans KR', sans-serif;
+        background: #FFFFFF;
+        /* Porcelain White */
+        color: #1A1A1A;
         overflow: hidden;
         position: relative;
     }
 
-    /* 팝업 내부의 모든 버튼과 클릭 요소에 대한 커서 명시 */
     .popup-body button,
     .popup-body [role="button"],
     .popup-body .cursor-pointer {
@@ -23,43 +23,83 @@
 }
 
 :root {
-    --primary: #5B6CFF;
-    --bg-light: #F8FAFF;
-    --text-dark: #2B2D42;
+    --porcelain: #FFFFFF;
+    --soft-gray: #F9FAFB;
+    --silver-border: #F2F4F7;
+    --linear-blue: #5B6CFF;
+    --linear-blue-soft: rgba(91, 108, 255, 0.08);
+    --text-primary: #1A1A1A;
+    --text-secondary: #475467;
+    --text-tertiary: #667085;
+    --accent-amber: #FDB827;
 }
 
 body {
     margin: 0;
     font-family: 'Inter', 'Noto Sans KR', sans-serif;
-    background-color: var(--bg-light);
-    color: var(--text-dark);
+    background-color: var(--porcelain);
+    color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.015em;
+    line-height: 1.5;
 }
 
-button,
-[role="button"],
-.cursor-pointer {
-    cursor: pointer;
+/* Linear-style layered shadow */
+.premium-shadow {
+    box-shadow:
+        0 1px 2px rgba(16, 24, 40, 0.05),
+        0 4px 6px -1px rgba(16, 24, 40, 0.1),
+        0 2px 4px -2px rgba(16, 24, 40, 0.06);
 }
 
-/* 익스텐션 팝업 전용 해상도 고정 */
-html.is-extension body {
-    width: 450px;
-    height: 600px;
-    overflow: hidden;
-    /* 배경 스크롤 방지 */
+.premium-card {
+    background: var(--porcelain);
+    border: 1px solid var(--silver-border);
+    border-radius: 12px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-html.is-extension #root {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+.premium-card:hover {
+    border-color: #D0D5DD;
+    background: var(--soft-gray);
+    transform: translateY(-1px);
+}
+
+/* Clean Button Styles */
+.btn-minimal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border: 1px solid var(--silver-border);
+    background: white;
+    color: var(--text-primary);
+}
+
+.btn-minimal:hover {
+    background: var(--soft-gray);
+    border-color: #D0D5DD;
+}
+
+.btn-primary-minimal {
+    background: var(--linear-blue);
+    color: white;
+    border: none;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.btn-primary-minimal:hover {
+    background: #4A5BE7;
+    box-shadow: 0 4px 8px rgba(91, 108, 255, 0.2);
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -67,52 +107,44 @@ html.is-extension #root {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #E2E6FF;
+    background: #EAECF0;
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #5B6CFF33;
+    background: #D0D5DD;
 }
 
-/* Glassmorphism */
-.glass {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-}
-
-.premium-gradient {
-    background: linear-gradient(135deg, #2B2D42 0%, #1a1c2c 100%);
-    position: relative;
-}
-
-.premium-gradient::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.03;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-}
-
-.animate-float {
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0% {
-        transform: translateY(0px);
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
     }
 
-    50% {
-        transform: translateY(-5px);
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
     }
 
     100% {
-        transform: translateY(0px);
+        transform: translateX(100%);
     }
+}
+
+.shimmer-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
 }

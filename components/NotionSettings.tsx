@@ -52,8 +52,10 @@ const NotionSettings: React.FC<ApiSettingsProps> = ({ config, onUpdateConfig }) 
       {/* AI Model Core Engine Section */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-50 flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#5B6CFF] bg-opacity-10 rounded-xl flex items-center justify-center text-2xl shadow-inner">
-            <span className="animate-pulse">⚙️</span>
+          <div className="w-12 h-12 bg-[#5B6CFF] bg-opacity-10 rounded-xl flex items-center justify-center shadow-inner">
+            <svg className="w-6 h-6 text-[#5B6CFF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" />
+            </svg>
           </div>
           <div>
             <h3 className="text-xl font-bold text-[#2B2D42]">AI 모델 코어 엔진</h3>

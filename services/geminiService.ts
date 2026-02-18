@@ -9,7 +9,7 @@ const getAIInstance = (apiKey: string) => {
   return new GoogleGenAI({ apiKey });
 };
 
-export const categorizeTabs = async (tabs: Tab[], apiKey: string, aiModel: string = "gemini-2.0-flash"): Promise<AnalysisResult> => {
+export const categorizeTabs = async (tabs: Tab[], apiKey: string, aiModel: string = "gemini-1.5-flash"): Promise<AnalysisResult> => {
   const prompt = `
     다음은 현재 브라우저에 열려 있는 탭 목록입니다. 
     이 탭들을 주제별로 3~5개의 그룹으로 분류해주세요.

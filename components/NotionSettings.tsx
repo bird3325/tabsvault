@@ -8,12 +8,17 @@ interface ApiSettingsProps {
 }
 
 const NotionSettings: React.FC<ApiSettingsProps> = ({ config, onUpdateConfig }) => {
+  const updateConfig = (newConfig: Partial<ApiConfig>) => {
+    const updated = { ...config, ...newConfig };
+    onUpdateConfig(updated as ApiConfig);
+  };
   const [notionApiKey, setNotionApiKey] = useState(config.notionApiKey);
-  const [notionDatabaseId, setNotionDatabaseId] = useState(config.notionDatabaseId);
+  // @ts-ignore: 하위 호환성을 위해 구형 키 확인
+  const [notionDatabaseId, setNotionDatabaseId] = useState(config.notionParentPageId || config.notionDatabaseId || '');
   const [geminiApiKey, setGeminiApiKey] = useState(config.geminiApiKey);
   const [openaiApiKey, setOpenaiApiKey] = useState(config.openaiApiKey || '');
   const [anthropicApiKey, setAnthropicApiKey] = useState(config.anthropicApiKey || '');
-  const [aiModel, setAiModel] = useState(config.aiModel || 'gemini-2.0-flash');
+  const [aiModel, setAiModel] = useState(config.aiModel || 'gemini-1.5-flash');
   const [isSaving, setIsSaving] = useState(false);
 
   // Visibility States
@@ -25,9 +30,10 @@ const NotionSettings: React.FC<ApiSettingsProps> = ({ config, onUpdateConfig }) 
   const handleSave = () => {
     setIsSaving(true);
     setTimeout(() => {
-      onUpdateConfig({
+      updateConfig({
         notionApiKey,
-        notionDatabaseId,
+        notionParentPageId: notionDatabaseId, // 인터페이스 통일
+        // notionDatabaseId, // 하위 호환성 유지 (Removed as it's not needed for updateConfig)
         geminiApiKey,
         openaiApiKey,
         anthropicApiKey,
@@ -74,14 +80,14 @@ const NotionSettings: React.FC<ApiSettingsProps> = ({ config, onUpdateConfig }) 
                 className="w-full pl-6 pr-12 py-4 border-2 border-[#5B6CFF] border-opacity-20 rounded-2xl focus:ring-4 focus:ring-[#5B6CFF] focus:ring-opacity-10 focus:border-[#5B6CFF] outline-none transition-all bg-white text-lg font-bold text-[#2B2D42] appearance-none cursor-pointer hover:border-opacity-40"
               >
                 <optgroup label="Google Gemini">
-                  <option value="gemini-2.0-flash">Gemini 3 Flash (추천: 빠른 속도/가성비)</option>
-                  <option value="gemini-1.5-pro">Gemini 3 Pro (고성능: 복잡한 추론/HTML)</option>
+                  <option value="gemini-2.0-flash">Gemini 3.0 Flash (Fast)</option>
+                  <option value="gemini-2.0-pro-exp-02-05">Gemini 3.0 Pro (Powerful)</option>
                 </optgroup>
-                <optgroup label="OpenAI (GPT)">
-                  <option value="gpt-4o">GPT-4o (Omni)</option>
-                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                <optgroup label="OpenAI GPT">
+                  <option value="gpt-4o-mini">GPT-4o mini</option>
+                  <option value="gpt-4o">GPT-4o</option>
                 </optgroup>
-                <optgroup label="Anthropic (Claude)">
+                <optgroup label="Anthropic Claude">
                   <option value="claude-3-5-sonnet-20240620">Claude 3.5 Sonnet</option>
                 </optgroup>
               </select>
@@ -208,12 +214,30 @@ const NotionSettings: React.FC<ApiSettingsProps> = ({ config, onUpdateConfig }) 
             </div>
           </div>
 
-          <div className="flex justify-end pt-4">
+          <div className="flex justify-between pt-4">
+            <button
+              onClick={() => {
+                if (confirm('정말로 모든 설정을 초기화하시겠습니까?')) {
+                  updateConfig({
+                    notionApiKey: '',
+                    notionParentPageId: '',
+                    geminiApiKey: '',
+                    openaiApiKey: '',
+                    anthropicApiKey: '',
+                    isConnected: false
+                  });
+                  alert('설정이 초기화되었습니다.');
+                }
+              }}
+              className="px-6 py-4 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-all text-sm"
+            >
+              설정 초기화
+            </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
               className={`px-10 py-4 rounded-2xl font-bold text-white shadow-xl transition-all ${isSaving ? 'bg-gray-400' : 'bg-[#5B6CFF] hover:bg-[#4A5BEF] hover:scale-105 active:scale-95'
-                }`}
+                } `}
             >
               {isSaving ? "처리 중..." : "모든 설정 저장하기"}
             </button>

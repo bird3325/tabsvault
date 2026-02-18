@@ -2,14 +2,15 @@
 import React from 'react';
 
 interface SidebarProps {
-  activeTab: 'dashboard' | 'history' | 'settings';
-  setActiveTab: (tab: 'dashboard' | 'history' | 'settings') => void;
+  activeTab: 'dashboard' | 'history' | 'settings' | 'guide';
+  setActiveTab: (tab: 'dashboard' | 'history' | 'settings' | 'guide') => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const navItems = [
     { id: 'dashboard', label: '대시보드', icon: '📊' },
     { id: 'history', label: '보관 내역', icon: '📁' },
+    { id: 'guide', label: '이용가이드', icon: '📖' },
     {
       id: 'settings', label: '설정', icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

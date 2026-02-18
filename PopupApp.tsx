@@ -3,71 +3,53 @@ import { Tab, AnalysisResult, CategoryGroup, ApiConfig } from './types';
 import { categorizeTabs } from './services/geminiService';
 import { saveTabsToNotion } from './services/notionService';
 import { getCurrentTabs, closeTab, subscribeToTabChanges } from './services/tabService';
+import { loadConfig, saveConfig } from './services/storageService';
+import NotionSettings from './components/NotionSettings';
+
+import Toast from './components/Toast';
 
 const PopupApp: React.FC = () => {
     const [tabs, setTabs] = useState<Tab[]>([]);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-    const [config, setConfig] = useState<ApiConfig | null>(null);
-    const [showSettings, setShowSettings] = useState(false);
-    const [selectedModel, setSelectedModel] = useState<string>('gemini-1.5-pro');
+    const [config, setConfig] = useState<ApiConfig>(() => loadConfig());
 
-    const loadConfig = () => {
-        chrome.storage.local.get(['notionApiKey', 'notionParentPageId', 'geminiApiKey', 'openaiApiKey', 'anthropicApiKey', 'aiModel'], (result) => {
-            const newConfig: ApiConfig = {
-                notionApiKey: (result.notionApiKey as string) || '',
-                notionParentPageId: (result.notionParentPageId as string) || '',
-                geminiApiKey: (result.geminiApiKey as string) || '',
-                openaiApiKey: (result.openaiApiKey as string) || '',
-                anthropicApiKey: (result.anthropicApiKey as string) || '',
-                aiModel: (result.aiModel as string) || 'gemini-1.5-pro',
-                isConnected: !!(result.notionApiKey && (result.geminiApiKey || result.openaiApiKey || result.anthropicApiKey))
-            };
-            setConfig(newConfig);
-        });
+    const [showSettings, setShowSettings] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info'; isVisible: boolean }>({
+        message: '',
+        type: 'success',
+        isVisible: false
+    });
+
+    const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+        setToast({ message, type, isVisible: true });
+    };
+
+    const loadConfigLocal = () => {
+        const newConfig = loadConfig();
+        setConfig(newConfig);
     };
 
     useEffect(() => {
-        loadConfig();
-        if (config?.aiModel) setSelectedModel(config.aiModel);
-        // ... (rest of the useEffect remains similar)
         const loadTabs = async () => {
             const currentTabs = await getCurrentTabs([]);
             setTabs(currentTabs);
         };
         loadTabs();
 
-        const handleStorageChange = (changes: any) => {
-            if (changes.notionApiKey || changes.notionParentPageId || changes.geminiApiKey || changes.openaiApiKey || changes.anthropicApiKey || changes.aiModel) {
-                loadConfig();
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'tabsvault_config') {
+                loadConfigLocal();
             }
         };
-        chrome.storage.onChanged.addListener(handleStorageChange);
+        window.addEventListener('storage', handleStorageChange);
         const tabUnsub = subscribeToTabChanges(loadTabs);
 
         return () => {
-            chrome.storage.onChanged.removeListener(handleStorageChange);
+            window.removeEventListener('storage', handleStorageChange);
             tabUnsub();
         };
     }, []);
-
-    const handleSaveConfig = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const newConfig = {
-            notionApiKey: formData.get('notionApiKey') as string,
-            notionParentPageId: formData.get('notionParentPageId') as string,
-            geminiApiKey: formData.get('geminiApiKey') as string,
-            openaiApiKey: formData.get('openaiApiKey') as string,
-            anthropicApiKey: formData.get('anthropicApiKey') as string,
-            aiModel: formData.get('aiModel') as string,
-        };
-
-        chrome.storage.local.set(newConfig, () => {
-            setShowSettings(false);
-            alert('설정이 저장되었습니다.');
-        });
-    };
 
     const handleAnalyze = async () => {
         if (!config || !config.isConnected) return setShowSettings(true);
@@ -81,8 +63,9 @@ const PopupApp: React.FC = () => {
 
             const result = await categorizeTabs(tabs, activeKey, model);
             setAnalysisResult(result);
+            showToast('AI 분석이 완료되었습니다.', 'success');
         } catch (err: any) {
-            alert(err.message);
+            showToast(err.message, 'error');
         } finally {
             setIsAnalyzing(false);
         }
@@ -94,9 +77,9 @@ const PopupApp: React.FC = () => {
         try {
             await saveTabsToNotion(groups, tabs, config);
             setAnalysisResult(null);
-            alert('성공적으로 저장되었습니다!');
+            showToast('성공적으로 저장되었습니다!', 'success');
         } catch (err: any) {
-            alert(err.message);
+            showToast(err.message, 'error');
         } finally {
             setIsAnalyzing(false);
         }
@@ -176,120 +159,23 @@ const PopupApp: React.FC = () => {
                             <p className="text-[11px] text-[#667085] mt-0.5">API 키 및 엔진을 구성하세요.</p>
                         </div>
 
-                        <div className="bg-[#F2F4F7] p-3 rounded-xl">
-                            <h4 className="text-[10px] font-bold text-[#344054] flex items-center gap-1.5 uppercase tracking-wider mb-1.5">
-                                <span>💡</span> 도움말
-                            </h4>
-                            <ul className="text-[10px] text-[#667085] space-y-1 list-disc pl-4 leading-relaxed">
-                                <li>Notion API 키는 'secret_...'으로 시작합니다.</li>
-                                <li>Database ID는 노션 페이지 URL의 32자리 문자열입니다.</li>
-                                <li>선택한 AI 모델에 맞는 API 키만 입력하면 됩니다.</li>
-                            </ul>
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-1">
+                            <NotionSettings
+                                config={config}
+                                onUpdateConfig={(newConfig) => {
+                                    saveConfig(newConfig);
+                                    setConfig(newConfig);
+                                    // NotionSettings handles the alert/toast internally or we can do it here via onUpdateConfig callback wrapper if needed.
+                                    // Actually NotionSettings accepts onUpdateConfig which takes the FULL config.
+                                    // NotionSettings internal handleSave calls onUpdateConfig.
+                                    // let's verify NotionSettings implementation.
+                                    // It calls updateConfig which calls onUpdateConfig.
+                                    // So we just save it here.
+                                    showToast('설정이 저장되었습니다.', 'success');
+                                    setShowSettings(false);
+                                }}
+                            />
                         </div>
-
-                        <form onSubmit={handleSaveConfig} className="space-y-4">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-[#667085] uppercase tracking-wider">AI Model & Engine</label>
-                                <select
-                                    name="aiModel"
-                                    value={selectedModel}
-                                    onChange={(e) => setSelectedModel(e.target.value)}
-                                    className="w-full px-3 py-2.5 bg-[#F9FAFB] border border-[#F2F4F7] rounded-xl text-xs outline-none focus:border-[#5B6CFF] appearance-none transition-all font-medium"
-                                >
-                                    <optgroup label="Google Gemini">
-                                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast)</option>
-                                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Powerful)</option>
-                                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                                    </optgroup>
-                                    <optgroup label="OpenAI GPT">
-                                        <option value="gpt-4o-mini">GPT-4o mini</option>
-                                        <option value="gpt-4o">GPT-4o</option>
-                                    </optgroup>
-                                    <optgroup label="Anthropic Claude">
-                                        <option value="claude-3-5-sonnet-20240620">Claude 3.5 Sonnet</option>
-                                    </optgroup>
-                                </select>
-                            </div>
-
-                            {selectedModel.startsWith('gemini') && (
-                                <div className="space-y-1.5 animate-fade-in">
-                                    <label className="text-[10px] font-bold text-[#667085] uppercase tracking-wider">Gemini API Key</label>
-                                    <input
-                                        name="geminiApiKey"
-                                        type="password"
-                                        defaultValue={config?.geminiApiKey}
-                                        className="w-full px-3 py-2.5 bg-[#F9FAFB] border border-[#F2F4F7] rounded-xl text-xs outline-none focus:border-[#5B6CFF] transition-all"
-                                        placeholder="AI API Key..."
-                                    />
-                                    <p className="text-[9px] text-[#98A2B3]">Google AI Studio에서 발급받은 키를 입력하세요.</p>
-                                </div>
-                            )}
-
-                            {selectedModel.startsWith('gpt') && (
-                                <div className="space-y-1.5 animate-fade-in">
-                                    <label className="text-[10px] font-bold text-[#667085] uppercase tracking-wider">OpenAI API Key</label>
-                                    <input
-                                        name="openaiApiKey"
-                                        type="password"
-                                        defaultValue={config?.openaiApiKey}
-                                        className="w-full px-3 py-2.5 bg-[#F9FAFB] border border-[#F2F4F7] rounded-xl text-xs outline-none focus:border-[#5B6CFF] transition-all"
-                                        placeholder="sk-..."
-                                    />
-                                    <p className="text-[9px] text-[#98A2B3]">OpenAI Dashboard에서 발급받은 키를 입력하세요.</p>
-                                </div>
-                            )}
-
-                            {selectedModel.startsWith('claude') && (
-                                <div className="space-y-1.5 animate-fade-in">
-                                    <label className="text-[10px] font-bold text-[#667085] uppercase tracking-wider">Anthropic API Key</label>
-                                    <input
-                                        name="anthropicApiKey"
-                                        type="password"
-                                        defaultValue={config?.anthropicApiKey}
-                                        className="w-full px-3 py-2.5 bg-[#F9FAFB] border border-[#F2F4F7] rounded-xl text-xs outline-none focus:border-[#5B6CFF] transition-all"
-                                        placeholder="sk-ant-..."
-                                    />
-                                    <p className="text-[9px] text-[#98A2B3]">Anthropic Console에서 발급받은 키를 입력하세요.</p>
-                                </div>
-                            )}
-
-                            <div className="h-px bg-[#F2F4F7] my-4"></div>
-
-                            <div className="space-y-1.5">
-                                <div className="flex justify-between items-center">
-                                    <label className="text-[10px] font-bold text-[#667085] uppercase tracking-wider">Notion API Key</label>
-                                </div>
-                                <input
-                                    name="notionApiKey"
-                                    type="password"
-                                    defaultValue={config?.notionApiKey}
-                                    className="w-full px-3 py-2.5 bg-[#F9FAFB] border border-[#F2F4F7] rounded-xl text-xs outline-none focus:border-[#5B6CFF] transition-all"
-                                    placeholder="secret_..."
-                                />
-                                <p className="text-[9px] text-[#98A2B3]">Notion '내 통합' 페이지에서 발급받은 키를 입력하세요.</p>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-[#667085] uppercase tracking-wider">Notion Database ID</label>
-                                <input
-                                    name="notionParentPageId"
-                                    type="text"
-                                    defaultValue={config?.notionParentPageId}
-                                    className="w-full px-3 py-2.5 bg-[#F9FAFB] border border-[#F2F4F7] rounded-xl text-xs outline-none focus:border-[#5B6CFF] transition-all"
-                                    placeholder="Database ID..."
-                                />
-                                <p className="text-[9px] text-[#98A2B3]">데이터베이스 URL의 32자리 문자열을 입력하세요.</p>
-                            </div>
-
-                            <div className="pt-4">
-                                <button
-                                    type="submit"
-                                    className="w-full py-3 bg-[#5B6CFF] text-white rounded-xl font-bold text-xs shadow-lg shadow-[#5B6CFF]/20 hover:bg-[#4A5BEF] transition-all active:scale-[0.98]"
-                                >
-                                    설정 저장
-                                </button>
-                            </div>
-                        </form>
                     </div>
                 ) : analysisResult ? (
                     <div className="space-y-4 animate-fade-in">
@@ -395,6 +281,13 @@ const PopupApp: React.FC = () => {
                     TabsVault • Intellectual Assets
                 </span>
             </footer>
+            {/* Toast Notification */}
+            <Toast
+                message={toast.message}
+                type={toast.type}
+                isVisible={toast.isVisible}
+                onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+            />
         </div>
     );
 };

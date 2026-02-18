@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import NotionSettings from './components/NotionSettings';
+import UserGuide from './components/UserGuide';
 import { AppState, Tab, CategoryGroup, ApiConfig } from './types';
 import { categorizeTabs } from './services/geminiService';
 import { saveTabsToNotion } from './services/notionService';
@@ -25,26 +26,15 @@ const MOCK_TABS: Tab[] = [
 
 import { getCurrentTabs, subscribeToTabChanges } from './services/tabService';
 
-const STORAGE_KEY = 'tabsvault_config';
+import { loadConfig, saveConfig, STORAGE_KEY } from './services/storageService';
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'history' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'history' | 'settings' | 'guide'>('dashboard');
   const [state, setState] = useState<AppState>(() => {
-    const savedConfig = localStorage.getItem(STORAGE_KEY);
-    const initialConfig: ApiConfig = savedConfig ? JSON.parse(savedConfig) : {
-      notionApiKey: '',
-      notionDatabaseId: '',
-      geminiApiKey: '',
-      openaiApiKey: '',
-      anthropicApiKey: '',
-      aiModel: 'gemini-2.0-flash',
-      isConnected: false
-    };
-
     return {
       tabs: [],
       threshold: 10,
-      config: initialConfig,
+      config: loadConfig(),
       isAnalyzing: false,
       analysisResult: null,
       syncHistory: [
@@ -53,6 +43,21 @@ const App: React.FC = () => {
       ]
     };
   });
+
+  // localStorage와 동기화
+  useEffect(() => {
+    // 변경 리스너: 다른 창(팝업 등)에서 변경 시 실시간 반영
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) {
+        console.log("App.tsx: Storage changed");
+        const updatedConfig = loadConfig();
+        setState(prev => ({ ...prev, config: updatedConfig }));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const [toast, setToast] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 800);
@@ -71,8 +76,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleUpdateConfig = (newConfig: ApiConfig) => {
+    saveConfig(newConfig);
     setState(s => ({ ...s, config: newConfig }));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newConfig));
   };
 
   // 탭 초기 로드 및 변경 구독
@@ -229,6 +234,8 @@ const App: React.FC = () => {
               </div>
             </div>
           )}
+
+          {activeTab === 'guide' && <UserGuide />}
         </div>
       </main>
     </div>

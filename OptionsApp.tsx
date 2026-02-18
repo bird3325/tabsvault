@@ -1,34 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import Toast from './components/Toast';
+import { loadConfig, saveConfig } from './services/storageService';
+import NotionSettings from './components/NotionSettings';
+import { ApiConfig } from './types';
 
 const OptionsApp: React.FC = () => {
-    const [notionApiKey, setNotionApiKey] = useState('');
-    const [notionParentPageId, setNotionParentPageId] = useState('');
-    const [geminiApiKey, setGeminiApiKey] = useState('');
-    const [status, setStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+    const [config, setConfig] = useState<ApiConfig>(() => loadConfig());
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info'; isVisible: boolean }>({
+        message: '',
+        type: 'success',
+        isVisible: false
+    });
 
     useEffect(() => {
-        // Load settings from chrome.storage
-        chrome.storage.local.get(['notionApiKey', 'notionParentPageId', 'geminiApiKey'], (result) => {
-            if (result.notionApiKey) setNotionApiKey(result.notionApiKey);
-            if (result.notionParentPageId) setNotionParentPageId(result.notionParentPageId);
-            if (result.geminiApiKey) setGeminiApiKey(result.geminiApiKey);
-        });
+        // Load settings from storageService
+        const result = loadConfig();
+        setConfig(result);
     }, []);
 
-    const handleSave = () => {
-        setStatus('saving');
-        chrome.storage.local.set({
-            notionApiKey,
-            notionParentPageId,
-            geminiApiKey
-        }, () => {
-            if (chrome.runtime.lastError) {
-                setStatus('error');
-            } else {
-                setStatus('success');
-                setTimeout(() => setStatus('idle'), 2000);
-            }
-        });
+    const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+        setToast({ message, type, isVisible: true });
     };
 
     return (
@@ -47,80 +38,14 @@ const OptionsApp: React.FC = () => {
 
                 {/* Settings Card: Porcelain & Glass Style */}
                 <div className="premium-card premium-shadow bg-white p-8 space-y-8">
-                    {/* Notion Section */}
-                    <section className="space-y-4">
-                        <div className="flex items-center gap-2 px-1">
-                            <span className="text-lg">📓</span>
-                            <h2 className="text-sm font-bold text-[#1A1A1A] uppercase tracking-wider">Notion Integration</h2>
-                        </div>
-                        <div className="grid gap-4">
-                            <div className="space-y-1.5">
-                                <label className="text-[11px] font-bold text-[#667085] ml-1 uppercase tracking-tight">Internal Integration Token</label>
-                                <input
-                                    type="password"
-                                    value={notionApiKey}
-                                    onChange={(e) => setNotionApiKey(e.target.value)}
-                                    placeholder="secret_..."
-                                    className="w-full px-4 py-3 bg-[#F9FAFB] border border-[#F2F4F7] rounded-xl text-sm focus:outline-none focus:border-[#5B6CFF] focus:bg-white transition-all placeholder:text-[#98A2B3]"
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[11px] font-bold text-[#667085] ml-1 uppercase tracking-tight">Parent Page ID</label>
-                                <input
-                                    type="text"
-                                    value={notionParentPageId}
-                                    onChange={(e) => setNotionParentPageId(e.target.value)}
-                                    placeholder="32자리 ID 입력"
-                                    className="w-full px-4 py-3 bg-[#F9FAFB] border border-[#F2F4F7] rounded-xl text-sm focus:outline-none focus:border-[#5B6CFF] focus:bg-white transition-all placeholder:text-[#98A2B3]"
-                                />
-                            </div>
-                        </div>
-                    </section>
-
-                    <div className="h-px bg-[#F2F4F7]"></div>
-
-                    {/* Gemini Section */}
-                    <section className="space-y-4">
-                        <div className="flex items-center gap-2 px-1">
-                            <span className="text-lg">✨</span>
-                            <h2 className="text-sm font-bold text-[#1A1A1A] uppercase tracking-wider">AI Analysis (Gemini)</h2>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[11px] font-bold text-[#667085] ml-1 uppercase tracking-tight">Gemini API Key</label>
-                            <input
-                                type="password"
-                                value={geminiApiKey}
-                                onChange={(e) => setGeminiApiKey(e.target.value)}
-                                placeholder="AIza..."
-                                className="w-full px-4 py-3 bg-[#F9FAFB] border border-[#F2F4F7] rounded-xl text-sm focus:outline-none focus:border-[#5B6CFF] focus:bg-white transition-all placeholder:text-[#98A2B3]"
-                            />
-                        </div>
-                    </section>
-
-                    {/* Action Section */}
-                    <div className="pt-4 flex items-center justify-between gap-4">
-                        <p className="text-[11px] text-[#98A2B3] font-medium leading-relaxed">
-                            입력된 정보는 사용자의 기기에 암호화되어 로컬에만 저장되며, 외부로 전송되지 않습니다.
-                        </p>
-                        <button
-                            onClick={handleSave}
-                            disabled={status === 'saving'}
-                            className={`min-w-[120px] px-6 py-3.5 rounded-xl font-bold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${status === 'success'
-                                ? 'bg-[#10B981] text-white shadow-lg shadow-[#10B981]/20'
-                                : status === 'error'
-                                    ? 'bg-[#F43F5E] text-white'
-                                    : 'bg-[#1A1A1A] text-white hover:bg-[#333333] shadow-lg shadow-[#1A1A1A]/10'
-                                }`}
-                        >
-                            {status === 'saving' ? (
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            ) : status === 'success' ? (
-                                <><span>Check</span> <span>저장 완료</span></>
-                            ) : (
-                                <span>저장하기</span>
-                            )}
-                        </button>
-                    </div>
+                    <NotionSettings
+                        config={config}
+                        onUpdateConfig={(newConfig) => {
+                            saveConfig(newConfig);
+                            setConfig(newConfig);
+                            showToast('설정이 저장되었습니다.', 'success');
+                        }}
+                    />
                 </div>
 
                 {/* Footer Section */}
@@ -128,6 +53,13 @@ const OptionsApp: React.FC = () => {
                     <p className="text-[10px] text-[#98A2B3] font-bold uppercase tracking-[0.2em]">TabsVault • Intellectual Assets Synergy</p>
                 </footer>
             </div>
+            {/* Toast Notification */}
+            <Toast
+                message={toast.message}
+                type={toast.type}
+                isVisible={toast.isVisible}
+                onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+            />
         </div>
     );
 };

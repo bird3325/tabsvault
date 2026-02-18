@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+@import "tailwindcss";
 
 @layer base {
     .popup-body {
@@ -14,12 +14,34 @@
         overflow: hidden;
         position: relative;
     }
+}
 
-    .popup-body button,
-    .popup-body [role="button"],
-    .popup-body .cursor-pointer {
-        cursor: pointer !important;
-    }
+/* 클릭 가능한 요소에만 손모양 포인터 설정 */
+button,
+a,
+select,
+label,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+[role="button"],
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+/* 텍스트 입력창은 텍스트 커서 유지 (기본값 보장) */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea,
+[contenteditable="true"] {
+    cursor: text !important;
 }
 
 :root {

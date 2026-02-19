@@ -5,7 +5,8 @@
     "description": "열린 탭을 지식 자산으로 관리하세요.",
     "permissions": [
         "tabs",
-        "storage"
+        "storage",
+        "tabGroups"
     ],
     "host_permissions": [
         "https://api.notion.com/*"

@@ -54,34 +54,30 @@ const NotionSettings: React.FC<ApiSettingsProps> = ({ config, onUpdateConfig }) 
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
       {/* AI Model Core Engine Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-50 flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#5B6CFF] bg-opacity-10 rounded-xl flex items-center justify-center shadow-inner">
-            <svg className="w-6 h-6 text-[#5B6CFF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-50 flex items-center gap-3 bg-gray-50/50">
+          <div className="w-6 h-6 bg-[#5B6CFF]/10 rounded-lg flex items-center justify-center">
+            <svg className="w-3.5 h-3.5 text-[#5B6CFF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" /><path d="M12 6v6l4 2" />
             </svg>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-[#2B2D42]">AI 모델 코어 엔진</h3>
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">전용 엔진 선택 (AI ENGINE)</p>
-          </div>
+          <h3 className="text-sm font-bold text-[#2B2D42]">AI 엔진 설정</h3>
         </div>
 
-        <div className="p-6 space-y-8">
+        <div className="p-4 space-y-3">
           {/* AI Engine Model Selection Dropdown */}
-          <div className="relative">
-            <label className="block text-sm font-bold text-gray-600 mb-3 ml-1">사용할 AI 엔진을 선택하세요</label>
+          <div>
             <div className="relative">
               <select
                 value={aiModel}
                 onChange={(e) => setAiModel(e.target.value)}
-                className="w-full pl-6 pr-12 py-4 border-2 border-[#5B6CFF] border-opacity-20 rounded-2xl focus:ring-4 focus:ring-[#5B6CFF] focus:ring-opacity-10 focus:border-[#5B6CFF] outline-none transition-all bg-white text-lg font-bold text-[#2B2D42] appearance-none cursor-pointer hover:border-opacity-40"
+                className="w-full pl-3 pr-8 py-2 border border-gray-200 rounded-lg text-xs font-bold text-[#2B2D42] focus:ring-2 focus:ring-[#5B6CFF]/20 focus:border-[#5B6CFF] outline-none transition-all bg-white cursor-pointer hover:bg-gray-50"
               >
                 <optgroup label="Google Gemini">
-                  <option value="gemini-2.0-flash">Gemini 3.0 Flash (Fast)</option>
-                  <option value="gemini-2.0-pro-exp-02-05">Gemini 3.0 Pro (Powerful)</option>
+                  <option value="gemini-3-flash-preview">Gemini 3.0 Flash (Preview)</option>
+                  <option value="gemini-3-pro-preview">Gemini 3.0 Pro (Preview)</option>
                 </optgroup>
                 <optgroup label="OpenAI GPT">
                   <option value="gpt-4o-mini">GPT-4o mini</option>
@@ -91,133 +87,106 @@ const NotionSettings: React.FC<ApiSettingsProps> = ({ config, onUpdateConfig }) 
                   <option value="claude-3-5-sonnet-20240620">Claude 3.5 Sonnet</option>
                 </optgroup>
               </select>
-              <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-[#5B6CFF]">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6">
-            {/* Conditional API Key Input based on Selected Model */}
-            {aiModel.startsWith('gemini') && (
-              <div className="p-6 rounded-2xl border-2 border-[#5B6CFF] border-opacity-40 bg-[#F8FAFF] animate-in zoom-in-95 duration-300">
-                <label className="block text-xs font-bold text-[#5B6CFF] mb-3 uppercase tracking-widest flex items-center justify-between">
-                  <span>Google Gemini API Key</span>
-                  <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-[10px] bg-white px-2 py-1 rounded-md shadow-sm hover:underline">발급받기 ↗</a>
-                </label>
-                <div className="relative">
-                  <input
-                    type={showGemini ? "text" : "password"}
-                    value={geminiApiKey}
-                    onChange={(e) => setGeminiApiKey(e.target.value)}
-                    placeholder="Gemini API Key를 입력하세요"
-                    className="w-full pl-4 pr-12 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#5B6CFF] outline-none font-mono text-sm shadow-inner transition-all"
-                  />
-                  <button
-                    onClick={() => setShowGemini(!showGemini)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#5B6CFF] transition-colors"
-                  >
-                    <ToggleIcon show={showGemini} />
-                  </button>
-                </div>
-              </div>
-            )}
+          {/* Conditional API Key Input based on Selected Model */}
+          {aiModel.startsWith('gemini') && (
+            <div className="relative group">
+              <input
+                type={showGemini ? "text" : "password"}
+                value={geminiApiKey}
+                onChange={(e) => setGeminiApiKey(e.target.value)}
+                placeholder="Gemini API Key"
+                className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-100 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#5B6CFF]/20 focus:border-[#5B6CFF] outline-none font-mono text-xs transition-all placeholder:text-gray-400"
+              />
+              <button
+                onClick={() => setShowGemini(!showGemini)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-[#5B6CFF] transition-colors p-1"
+              >
+                <ToggleIcon show={showGemini} />
+              </button>
+            </div>
+          )}
 
-            {aiModel.startsWith('gpt') && (
-              <div className="p-6 rounded-2xl border-2 border-[#5B6CFF] border-opacity-40 bg-[#F8FAFF] animate-in zoom-in-95 duration-300">
-                <label className="block text-xs font-bold text-[#5B6CFF] mb-3 uppercase tracking-widest flex items-center justify-between">
-                  <span>OpenAI API Key</span>
-                  <a href="https://platform.openai.com/api-keys" target="_blank" className="text-[10px] bg-white px-2 py-1 rounded-md shadow-sm hover:underline">발급받기 ↗</a>
-                </label>
-                <div className="relative">
-                  <input
-                    type={showOpenai ? "text" : "password"}
-                    value={openaiApiKey}
-                    onChange={(e) => setOpenaiApiKey(e.target.value)}
-                    placeholder="sk-..."
-                    className="w-full pl-4 pr-12 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#5B6CFF] outline-none font-mono text-sm shadow-inner transition-all"
-                  />
-                  <button
-                    onClick={() => setShowOpenai(!showOpenai)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#5B6CFF] transition-colors"
-                  >
-                    <ToggleIcon show={showOpenai} />
-                  </button>
-                </div>
-              </div>
-            )}
+          {aiModel.startsWith('gpt') && (
+            <div className="relative group">
+              <input
+                type={showOpenai ? "text" : "password"}
+                value={openaiApiKey}
+                onChange={(e) => setOpenaiApiKey(e.target.value)}
+                placeholder="OpenAI API Key (sk-...)"
+                className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-100 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#5B6CFF]/20 focus:border-[#5B6CFF] outline-none font-mono text-xs transition-all placeholder:text-gray-400"
+              />
+              <button
+                onClick={() => setShowOpenai(!showOpenai)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-[#5B6CFF] transition-colors p-1"
+              >
+                <ToggleIcon show={showOpenai} />
+              </button>
+            </div>
+          )}
 
-            {aiModel.startsWith('claude') && (
-              <div className="p-6 rounded-2xl border-2 border-[#5B6CFF] border-opacity-40 bg-[#F8FAFF] animate-in zoom-in-95 duration-300">
-                <label className="block text-xs font-bold text-[#5B6CFF] mb-3 uppercase tracking-widest flex items-center justify-between">
-                  <span>Anthropic API Key</span>
-                  <a href="https://console.anthropic.com/settings/keys" target="_blank" className="text-[10px] bg-white px-2 py-1 rounded-md shadow-sm hover:underline">발급받기 ↗</a>
-                </label>
-                <div className="relative">
-                  <input
-                    type={showAnthropic ? "text" : "password"}
-                    value={anthropicApiKey}
-                    onChange={(e) => setAnthropicApiKey(e.target.value)}
-                    placeholder="sk-ant-..."
-                    className="w-full pl-4 pr-12 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#5B6CFF] outline-none font-mono text-sm shadow-inner transition-all"
-                  />
-                  <button
-                    onClick={() => setShowAnthropic(!showAnthropic)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#5B6CFF] transition-colors"
-                  >
-                    <ToggleIcon show={showAnthropic} />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          {aiModel.startsWith('claude') && (
+            <div className="relative group">
+              <input
+                type={showAnthropic ? "text" : "password"}
+                value={anthropicApiKey}
+                onChange={(e) => setAnthropicApiKey(e.target.value)}
+                placeholder="Anthropic API Key (sk-ant-...)"
+                className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-100 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#5B6CFF]/20 focus:border-[#5B6CFF] outline-none font-mono text-xs transition-all placeholder:text-gray-400"
+              />
+              <button
+                onClick={() => setShowAnthropic(!showAnthropic)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-[#5B6CFF] transition-colors p-1"
+              >
+                <ToggleIcon show={showAnthropic} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Notion Connection Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-50">
-          <h3 className="text-lg font-bold text-[#2B2D42]">Notion 연동 설정</h3>
-          <p className="text-sm text-gray-500">지식 자산을 저장할 Notion 정보를 입력하세요.</p>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
+          <h3 className="text-sm font-bold text-[#2B2D42]">Notion 연동</h3>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-4 space-y-3">
+          <div className="space-y-2">
             <div className="relative">
-              <label className="block text-sm font-bold text-gray-700 mb-2">Notion API Key</label>
-              <div className="relative">
-                <input
-                  type={showNotion ? "text" : "password"}
-                  value={notionApiKey}
-                  onChange={(e) => setNotionApiKey(e.target.value)}
-                  placeholder="secret_..."
-                  className="w-full pl-4 pr-12 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5B6CFF] focus:border-transparent outline-none transition-all"
-                />
-                <button
-                  onClick={() => setShowNotion(!showNotion)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#5B6CFF] transition-colors"
-                >
-                  <ToggleIcon show={showNotion} />
-                </button>
-              </div>
+              <input
+                type={showNotion ? "text" : "password"}
+                value={notionApiKey}
+                onChange={(e) => setNotionApiKey(e.target.value)}
+                placeholder="Notion Integration Token (secret_...)"
+                className="w-full pl-3 pr-8 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5B6CFF]/20 focus:border-[#5B6CFF] outline-none text-xs font-mono transition-all"
+              />
+              <button
+                onClick={() => setShowNotion(!showNotion)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-[#5B6CFF] transition-colors p-1"
+              >
+                <ToggleIcon show={showNotion} />
+              </button>
             </div>
 
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Notion Database ID</label>
-              <input
-                type="text"
-                value={notionDatabaseId}
-                onChange={(e) => setNotionDatabaseId(e.target.value)}
-                placeholder="Database ID..."
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5B6CFF] focus:border-transparent outline-none transition-all"
-              />
-            </div>
+            <input
+              type="text"
+              value={notionDatabaseId}
+              onChange={(e) => setNotionDatabaseId(e.target.value)}
+              placeholder="Database ID"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5B6CFF]/20 focus:border-[#5B6CFF] outline-none text-xs font-mono transition-all"
+            />
           </div>
 
-          <div className="flex justify-between pt-4">
+          <div className="flex justify-end gap-2 pt-1">
             <button
               onClick={() => {
-                if (confirm('정말로 모든 설정을 초기화하시겠습니까?')) {
+                if (confirm('설정을 초기화하시겠습니까?')) {
                   updateConfig({
                     notionApiKey: '',
                     notionParentPageId: '',
@@ -226,20 +195,26 @@ const NotionSettings: React.FC<ApiSettingsProps> = ({ config, onUpdateConfig }) 
                     anthropicApiKey: '',
                     isConnected: false
                   });
-                  alert('설정이 초기화되었습니다.');
                 }
               }}
-              className="px-6 py-4 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-all text-sm"
+              className="px-3 py-2 rounded-lg font-bold text-gray-400 hover:bg-gray-100 hover:text-red-500 transition-all text-xs"
             >
-              설정 초기화
+              초기화
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className={`px-10 py-4 rounded-2xl font-bold text-white shadow-xl transition-all ${isSaving ? 'bg-gray-400' : 'bg-[#5B6CFF] hover:bg-[#4A5BEF] hover:scale-105 active:scale-95'
+              className={`flex-1 px-4 py-2 rounded-lg font-bold text-white shadow-sm transition-all text-xs flex items-center justify-center gap-1.5 ${isSaving ? 'bg-gray-400' : 'bg-[#5B6CFF] hover:bg-[#4A5BEF] active:scale-[0.98]'
                 } `}
             >
-              {isSaving ? "처리 중..." : "모든 설정 저장하기"}
+              {isSaving ? (
+                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>저장</span>
+                  <svg className="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                </>
+              )}
             </button>
           </div>
         </div>

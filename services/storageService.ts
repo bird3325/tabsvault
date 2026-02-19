@@ -17,7 +17,18 @@ export const loadConfig = (): ApiConfig => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
         try {
-            return JSON.parse(saved);
+            const config = JSON.parse(saved);
+
+            // Migration: gemini-1.5... / gemini-3... -> gemini-3-flash-preview
+            // 잦은 모델 ID 변경 대응: 1.5, 3.0, 3-flash 등 구버전 ID를 모두 최신 Preview 버전으로 마이그레이션
+            if (config.aiModel === 'gemini-1.5-flash' ||
+                config.aiModel === 'gemini-3.0-flash' ||
+                config.aiModel === 'gemini-3-flash') {
+                config.aiModel = 'gemini-3-flash-preview';
+                saveConfig(config); // Update storage immediately
+            }
+
+            return config;
         } catch (e) {
             console.error('Failed to parse config from localStorage', e);
         }
@@ -28,7 +39,7 @@ export const loadConfig = (): ApiConfig => {
         geminiApiKey: '',
         openaiApiKey: '',
         anthropicApiKey: '',
-        aiModel: 'gemini-1.5-flash',
+        aiModel: 'gemini-3-flash-preview', // Default to 3-preview
         isConnected: false
     };
 };

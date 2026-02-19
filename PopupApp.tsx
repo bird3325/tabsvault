@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Tab, AnalysisResult, CategoryGroup, ApiConfig } from './types';
 import { categorizeTabs } from './services/geminiService';
+import { groupTabsByDomain } from './services/simpleGroupingService';
 import { saveTabsToNotion } from './services/notionService';
-import { getCurrentTabs, closeTab, subscribeToTabChanges } from './services/tabService';
+import { getCurrentTabs, closeTab, subscribeToTabChanges, groupTabs, ungroupCurrentTabs } from './services/tabService';
 import { loadConfig, saveConfig } from './services/storageService';
 import NotionSettings from './components/NotionSettings';
 
@@ -52,15 +53,23 @@ const PopupApp: React.FC = () => {
     }, []);
 
     const handleAnalyze = async () => {
-        if (!config || !config.isConnected) return setShowSettings(true);
+        // AI 분석은 Notion 연동이 없어도 AI API 키만 있으면 실행 가능하도록 수정
+        if (!config) return setShowSettings(true);
+
+        let activeKey = '';
+        const model = config.aiModel;
+
+        if (model.startsWith('gemini')) activeKey = config.geminiApiKey;
+        else if (model.startsWith('gpt')) activeKey = config.openaiApiKey;
+        else if (model.startsWith('claude')) activeKey = config.anthropicApiKey;
+
+        if (!activeKey) {
+            showToast('선택한 AI 모델의 API Key가 설정되지 않았습니다.', 'error');
+            return setShowSettings(true);
+        }
+
         setIsAnalyzing(true);
         try {
-            let activeKey = '';
-            const model = config.aiModel;
-            if (model.startsWith('gemini')) activeKey = config.geminiApiKey;
-            else if (model.startsWith('gpt')) activeKey = config.openaiApiKey;
-            else if (model.startsWith('claude')) activeKey = config.anthropicApiKey;
-
             const result = await categorizeTabs(tabs, activeKey, model);
             setAnalysisResult(result);
             showToast('AI 분석이 완료되었습니다.', 'success');
@@ -68,6 +77,37 @@ const PopupApp: React.FC = () => {
             showToast(err.message, 'error');
         } finally {
             setIsAnalyzing(false);
+        }
+    };
+
+    const handleSimpleGroup = async () => {
+        setIsAnalyzing(true);
+        try {
+            const groups = groupTabsByDomain(tabs);
+            setAnalysisResult({ groups });
+            showToast('도메인별 정리가 완료되었습니다.', 'success');
+        } catch (err: any) {
+            showToast(err.message, 'error');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const handleApplyToBrowser = async (groups: CategoryGroup[]) => {
+        try {
+            await groupTabs(groups);
+            showToast('브라우저 탭이 그룹화되었습니다.', 'success');
+        } catch (err: any) {
+            showToast('탭 그룹화 실패: ' + err.message, 'error');
+        }
+    };
+
+    const handleUngroup = async () => {
+        try {
+            await ungroupCurrentTabs();
+            showToast('모든 탭 그룹이 해제되었습니다.', 'success');
+        } catch (err: any) {
+            showToast('탭 그룹 해제 실패: ' + err.message, 'error');
         }
     };
 
@@ -91,9 +131,7 @@ const PopupApp: React.FC = () => {
             <header className="px-5 py-5 bg-[#5B6CFF] flex-shrink-0 z-20 shadow-lg shadow-[#5B6CFF]/20">
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 bg-white/20 border border-white/20 rounded-lg flex items-center justify-center font-bold shadow-inner backdrop-blur-sm">
-                            <span className="text-xs text-white">TV</span>
-                        </div>
+                        <img src="/icons/icon48.png" className="w-8 h-8 rounded-lg shadow-inner bg-white p-0.5" alt="TabsVault" />
                         <div>
                             <h1 className="text-sm font-bold tracking-tight text-white">TabsVault</h1>
                             <div className="flex items-center gap-1.5 mt-0.5">
@@ -131,6 +169,20 @@ const PopupApp: React.FC = () => {
                                 <span className="text-lg font-bold text-white leading-tight mt-0.5">{tabs.length} 탭</span>
                             </div>
                             <div className="w-px h-6 bg-white/10"></div>
+                            <button
+                                onClick={handleSimpleGroup}
+                                disabled={isAnalyzing}
+                                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-white transition-all disabled:opacity-50 relative group hover:shadow-lg hover:shadow-white/5 mr-2"
+                            >
+                                <span>🌐 도메인별</span>
+                            </button>
+                            <button
+                                onClick={handleUngroup}
+                                disabled={isAnalyzing}
+                                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-white transition-all disabled:opacity-50 relative group hover:shadow-lg hover:shadow-white/5 mr-2"
+                            >
+                                <span>🚫 해제</span>
+                            </button>
                             <button
                                 onClick={handleAnalyze}
                                 disabled={isAnalyzing}
@@ -179,7 +231,7 @@ const PopupApp: React.FC = () => {
                     </div>
                 ) : analysisResult ? (
                     <div className="space-y-4 animate-fade-in">
-// ... (rest of the analysisResult view remains same)
+
                         <div className="flex justify-between items-center px-1">
                             <div>
                                 <h3 className="font-bold text-[#101828] text-sm">AI 정리 제안</h3>
@@ -195,30 +247,37 @@ const PopupApp: React.FC = () => {
 
                         <div className="space-y-2">
                             {analysisResult.groups.map((group, idx) => (
-                                <div key={idx} className="premium-card p-3 flex items-center justify-between group/card" style={{ animationDelay: `${idx * 0.05}s` }}>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-9 h-9 rounded-xl bg-[#F9FAFB] border border-[#F2F4F7] flex items-center justify-center text-lg group-hover/card:bg-white transition-all">
+                                <div key={idx} className="premium-card p-2.5 flex items-center justify-between group/card" style={{ animationDelay: `${idx * 0.05}s` }}>
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] border border-[#F2F4F7] flex items-center justify-center text-sm group-hover/card:bg-white transition-all shadow-sm">
                                             {group.tag}
                                         </div>
                                         <div>
-                                            <span className="font-bold text-xs text-[#1A1A1A] block">{group.name}</span>
-                                            <span className="text-[10px] text-[#667085] block mt-0.5">{group.tabIds.length}개 탭 통합</span>
+                                            <span className="font-bold text-[11px] text-[#2B2D42] block leading-tight">{group.name}</span>
+                                            <span className="text-[9px] text-[#667085] block mt-0.5">{group.tabIds.length}개 탭</span>
                                         </div>
                                     </div>
-                                    <div className="px-2 py-1 bg-[#F9FAFB] rounded-md border border-[#F2F4F7] text-[9px] font-bold text-[#667085] group-hover/card:bg-[#5B6CFF] group-hover/card:text-white group-hover/card:border-[#5B6CFF] transition-all">
+                                    <div className="px-2 py-0.5 bg-[#F9FAFB] rounded text-[9px] font-bold text-[#667085] group-hover/card:bg-[#5B6CFF] group-hover/card:text-white transition-colors cursor-pointer border border-[#F2F4F7] group-hover/card:border-[#5B6CFF]">
                                         SAVE
                                     </div>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="pt-2">
+                        <div className="pt-2 flex gap-2">
+                            <button
+                                onClick={() => handleApplyToBrowser(analysisResult.groups)}
+                                className="flex-1 py-3.5 bg-[#5B6CFF] text-white rounded-xl font-bold text-xs shadow-sm shadow-[#5B6CFF]/20 hover:bg-[#4A5AE0] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                            >
+                                <span>📑</span>
+                                <span>적용</span>
+                            </button>
                             <button
                                 onClick={() => handleSave(analysisResult.groups)}
-                                className="w-full py-3.5 bg-[#1A1A1A] text-white rounded-xl font-bold text-xs shadow-sm shadow-[#1A1A1A]/10 hover:bg-[#333333] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                                className="flex-1 py-3.5 bg-[#1A1A1A] text-white rounded-xl font-bold text-xs shadow-sm shadow-[#1A1A1A]/10 hover:bg-[#333333] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                             >
                                 <span>🛡️</span>
-                                <span>Notion 워크스페이스에 즉시 보관</span>
+                                <span>Notion 저장</span>
                             </button>
                         </div>
                     </div>

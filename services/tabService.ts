@@ -1,5 +1,5 @@
 
-import { Tab } from "../types";
+import { Tab, CategoryGroup } from "../types";
 
 /**
  * 브라우저 익스텐션 환경에서 실행 중인지 확인합니다.
@@ -55,4 +55,68 @@ export const subscribeToTabChanges = (callback: () => void) => {
         };
     }
     return () => { };
+};
+
+
+/**
+ * 주어진 그룹 정보에 따라 브라우저 탭을 그룹화합니다.
+ */
+export const groupTabs = async (groups: CategoryGroup[]): Promise<void> => {
+    if (!isExtensionEnvironment()) {
+        console.log('[Mock] 브라우저 탭 그룹화가 실행되었습니다.', groups);
+        return;
+    }
+
+    try {
+        for (const group of groups) {
+            if (group.tabIds.length === 0) continue;
+
+            const tabIds = group.tabIds.map(id => Number(id));
+
+            // 1. 탭들을 그룹으로 묶음
+            // chrome.tabs.group returns the groupId in the callback or promise
+            const groupId = await new Promise<number>((resolve) => {
+                chrome.tabs.group({ tabIds: tabIds as any }, (id) => resolve(id));
+            });
+
+            // 2. 그룹 메타데이터(이름, 색상) 업데이트
+            // 가능한 색상: "grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "orange"
+            const colors: string[] = ["blue", "red", "yellow", "green", "pink", "purple", "cyan", "orange"];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)] as any;
+
+            await chrome.tabGroups.update(groupId, {
+                title: group.name,
+                color: randomColor
+            });
+        }
+    } catch (error) {
+        console.error('Failed to group tabs:', error);
+        throw error;
+    }
+};
+
+/**
+ * 현재 윈도우의 모든 탭 그룹을 해제합니다.
+ */
+export const ungroupCurrentTabs = async (): Promise<void> => {
+    if (!isExtensionEnvironment()) {
+        console.log('[Mock] 탭 그룹 해제가 실행되었습니다.');
+        return;
+    }
+
+    try {
+        // 현재 윈도우의 모든 탭 조회
+        const tabs = await new Promise<chrome.tabs.Tab[]>((resolve) => {
+            chrome.tabs.query({ currentWindow: true }, (tabs) => resolve(tabs));
+        });
+
+        const tabIds = tabs.map(t => t.id).filter((id): id is number => id !== undefined);
+
+        if (tabIds.length > 0) {
+            await chrome.tabs.ungroup(tabIds as any);
+        }
+    } catch (error) {
+        console.error('Failed to ungroup tabs:', error);
+        throw error;
+    }
 };

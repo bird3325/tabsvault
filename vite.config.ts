@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => {
           main: path.resolve(__dirname, 'index.html'),
           popup: path.resolve(__dirname, 'popup.html'),
           options: path.resolve(__dirname, 'options.html'),
+          privacy: path.resolve(__dirname, 'privacy.html'),
         },
       },
     },

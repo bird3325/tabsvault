@@ -86,7 +86,7 @@ const PrivacyApp: React.FC = () => {
                                 7. 문의처
                             </h2>
                             <p>서비스 이용 중 궁금한 사항이나 개인정보 관련 문의는 다음의 연락처로 주시기 바랍니다:</p>
-                            <p className="mt-2 text-[#5B6CFF] font-semibold">이메일: support@tabsvault.io</p>
+                            <p className="mt-2 text-[#5B6CFF] font-semibold">이메일: it_slab@naver.com</p>
                         </section>
                     </div>
 

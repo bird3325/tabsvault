@@ -56,7 +56,7 @@ const PrivacyApp: React.FC = () => {
                             </h2>
                             <p>서비스는 사용자의 동의 없이 개인정보를 제3자에게 판매하거나 제공하지 않습니다. 다만, 서비스 기능 제공을 위해 다음의 API를 사용합니다:</p>
                             <ul className="list-disc pl-6 space-y-2">
-                                <li><strong>Notion API:</strong> 사용자가 저장하고자 하는 데이터를 본인의 Notion 워크스페이스에 전송합니다.</li>
+                                <li><strong>Notion API (https://api.notion.com/*):</strong> 사용자가 저장하고자 하는 데이터를 본인의 Notion 워크스페이스에 전송하고 저장하기 위해 해당 도메인과의 통신 권한을 사용합니다.</li>
                                 <li><strong>AI API (OpenAI/Gemini):</strong> 탭의 제목 및 메타데이터를 기반으로 카테고리를 자동 생성하기 위해 일시적으로 텍스트 데이터를 전송합니다. 이 데이터는 학습용으로 저장되지 않도록 설정됩니다.</li>
                             </ul>
                         </section>
